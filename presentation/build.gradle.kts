@@ -67,6 +67,12 @@ dependencies {
     implementation(libs.android.hilt)
     kapt(libs.android.dagger.compiler)
 
+    // Navigation
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Reflect
+    implementation(kotlin("reflect"))
+
     // Local Module
     implementation(project(":domain"))
 

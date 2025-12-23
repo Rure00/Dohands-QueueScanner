@@ -33,78 +33,71 @@ import com.outsourcing.presentation.state.JobSummaryUiModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobListScreen(
-    summary: JobSummaryUiModel,
-    jobs: List<JobEventUiModel>,
-    forceOffline: Boolean,
-    onBack: () -> Unit,
-    onSyncNow: () -> Unit,
-    onClickJob: (JobEventUiModel) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text("Queue") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* optional menu */ }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "More")
-                    }
-                }
-            )
-        }
-    ) { inner ->
-        Column(
+    val jobs: List<JobEventUiModel> = listOf()
+    val summary: JobSummaryUiModel = JobSummaryUiModel(0, 0, 0)
+    val forceOffline: Boolean = false
+
+
+    val onBack: () -> Unit = {
+
+    }
+    val onSyncNow: () -> Unit = {
+
+    }
+    val onClickJob: (JobEventUiModel) -> Unit= {
+
+    }
+
+
+    // =============================================================================
+
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        SummaryRow(
+            summary = summary,
+            forceOffline = forceOffline,
             modifier = Modifier
-                .padding(inner)
-                .fillMaxSize()
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        Button(
+            onClick = onSyncNow,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            SummaryRow(
-                summary = summary,
-                forceOffline = forceOffline,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
+            Text("SYNC NOW")
+        }
 
-            Button(
-                onClick = onSyncNow,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("SYNC NOW")
-            }
+        Spacer(Modifier.height(12.dp))
 
-            Spacer(Modifier.height(12.dp))
+        Text(
+            "Work Events",
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.titleSmall,
+            color = Color(0xFF444444)
+        )
 
-            Text(
-                "Work Events",
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.titleSmall,
-                color = Color(0xFF444444)
-            )
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                items(jobs, key = { it.id }) { job ->
-                    JobRow(
-                        job = job,
-                        onClick = { onClickJob(job) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                    )
-                }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            items(jobs, key = { it.id }) { job ->
+                JobRow(
+                    job = job,
+                    onClick = { onClickJob(job) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                )
             }
         }
     }
