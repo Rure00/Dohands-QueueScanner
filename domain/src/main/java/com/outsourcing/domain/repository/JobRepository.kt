@@ -4,5 +4,5 @@ import com.outsourcing.domain.entities.Job
 import kotlinx.coroutines.flow.Flow
 
 interface JobRepository {
-    suspend fun syncJob(): Flow<Job>
+    suspend fun sendJob(job: Job): Result<Job>
 }
