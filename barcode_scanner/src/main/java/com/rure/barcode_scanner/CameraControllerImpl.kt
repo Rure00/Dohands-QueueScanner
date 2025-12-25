@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CameraControllerImpl(
+internal class CameraControllerImpl(
     private val context: Context
 ): CameraController {
     private val _cameraState = MutableStateFlow<CameraUiState>(CameraUiState.NotReady)

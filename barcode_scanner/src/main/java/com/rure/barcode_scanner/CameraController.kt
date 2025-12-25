@@ -5,7 +5,7 @@ import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.StateFlow
 
-fun createCameraController(context: Context) = CameraControllerImpl(context)
+fun createCameraController(context: Context): CameraController = CameraControllerImpl(context)
 
 interface CameraController {
     val cameraState: StateFlow<CameraUiState>
