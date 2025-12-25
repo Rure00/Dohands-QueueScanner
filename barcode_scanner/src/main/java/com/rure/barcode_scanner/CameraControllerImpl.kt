@@ -13,12 +13,18 @@ import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class CameraControllerImpl(
     private val context: Context
 ): CameraController {
+    private val _cameraState = MutableStateFlow<CameraUiState>(CameraUiState.NotReady)
+    override val cameraState: StateFlow<CameraUiState> = _cameraState.asStateFlow()
+
     private lateinit var cameraController: LifecycleCameraController
     private lateinit var previewView: PreviewView
     private lateinit var barcodeScanner: BarcodeScanner
@@ -60,6 +66,7 @@ class CameraControllerImpl(
 
         previewView.controller = cameraController
         cameraExecutor = Executors.newSingleThreadExecutor()
+        _cameraState.value = CameraUiState.Ready
     }
 
     override suspend fun takePhoto(): String {
