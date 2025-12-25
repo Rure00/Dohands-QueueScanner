@@ -2,6 +2,7 @@ package com.rure.barcode_scanner
 
 import android.content.Context
 import android.view.View
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED
 import androidx.camera.core.Preview
 import androidx.camera.mlkit.vision.MlKitAnalyzer
@@ -38,14 +39,20 @@ internal class CameraControllerImpl(
             .setBarcodeFormats(Barcode.FORMAT_CODABAR)
             .build()
         barcodeScanner = BarcodeScanning.getClient(options)
-        previewView = PreviewView(context)
 
         val mainExecutor = ContextCompat.getMainExecutor(context)
+        cameraExecutor = Executors.newSingleThreadExecutor()
+
+        previewView = PreviewView(context).apply {
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+            scaleType = PreviewView.ScaleType.FILL_CENTER
+        }
 
         cameraController = LifecycleCameraController(context).apply {
-            bindToLifecycle(lifecycleOwner)
+            cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
             setImageAnalysisAnalyzer(
-                mainExecutor,
+                cameraExecutor,
                 MlKitAnalyzer(
                     listOf(barcodeScanner),
                     COORDINATE_SYSTEM_VIEW_REFERENCED,
@@ -65,7 +72,11 @@ internal class CameraControllerImpl(
         }
 
         previewView.controller = cameraController
-        cameraExecutor = Executors.newSingleThreadExecutor()
+        cameraController.bindToLifecycle(lifecycleOwner)
+
+
+
+
         _cameraState.value = CameraUiState.Ready
     }
 

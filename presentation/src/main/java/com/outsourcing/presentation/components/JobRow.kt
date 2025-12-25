@@ -13,11 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.outsourcing.domain.entities.Job
 import com.outsourcing.domain.entities.JobStatus
 
 @Composable
 fun JobRow(
-    job: JobEventUiModel,
+    job: Job,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -44,7 +45,7 @@ fun JobRow(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        job.timeText,
+                        job.time.toString(),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF666666)
                     )
@@ -55,7 +56,7 @@ fun JobRow(
             if (job.status == JobStatus.FAILED && !job.errorText.isNullOrBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    job.errorText,
+                    job.errorText?: "알 수 없음",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF666666),
                     maxLines = 1,
