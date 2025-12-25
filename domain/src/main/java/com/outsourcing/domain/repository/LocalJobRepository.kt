@@ -10,6 +10,6 @@ interface LocalJobRepository {
     suspend fun getPendingJob(): Result<List<Job>>
     suspend fun getFailedJob(): Result<List<Job>>
 
-    suspend fun addJob(job: Job): Result<Job>
-    suspend fun deleteJob(job: Job): Result<Job>
+    suspend fun addJob(job: Job): Result<Boolean>
+    suspend fun deleteJob(job: Job): Result<Boolean>
 }

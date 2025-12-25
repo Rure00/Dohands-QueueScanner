@@ -70,6 +70,11 @@ dependencies {
     implementation(libs.android.hilt)
     kapt(libs.android.dagger.compiler)
 
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
+
     // Local Module
     implementation(project(":presentation"))
     implementation(project(":domain"))
