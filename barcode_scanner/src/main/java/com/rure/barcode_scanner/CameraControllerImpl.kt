@@ -1,6 +1,7 @@
 package com.rure.barcode_scanner
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED
@@ -36,7 +37,7 @@ internal class CameraControllerImpl(
 
     override fun startCamera(lifecycleOwner: LifecycleOwner) {
         val options = BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_CODABAR)
+            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
             .build()
         barcodeScanner = BarcodeScanning.getClient(options)
 
@@ -50,6 +51,7 @@ internal class CameraControllerImpl(
 
         cameraController = LifecycleCameraController(context).apply {
             cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            setEnabledUseCases(androidx.camera.view.CameraController.IMAGE_ANALYSIS)
 
             setImageAnalysisAnalyzer(
                 cameraExecutor,
@@ -58,15 +60,14 @@ internal class CameraControllerImpl(
                     COORDINATE_SYSTEM_VIEW_REFERENCED,
                     mainExecutor
                 ) { result: MlKitAnalyzer.Result? ->
-                    val barcodeResults = result?.getValue(barcodeScanner)   // result
-                    if ((barcodeResults == null) ||
-                        (barcodeResults.size == 0) ||
-                        (barcodeResults.first() == null)
-                    ) {
-                        // previewView.overlay.clear()
-                        // previewView.setOnTouchListener { _, _ -> false } //no-op
-                        return@MlKitAnalyzer
-                    }
+                    val barcodeResults = result?.getValue(barcodeScanner).orEmpty()   // result
+                    _cameraState.value = CameraUiState.Scanning
+
+                    Log.d("CameraController", "barcodeResults: $barcodeResults")
+
+                    if (barcodeResults.isEmpty()) return@MlKitAnalyzer
+
+                    _cameraState.value = CameraUiState.Captured(barcodeResults[0].toString())
                 }
             )
         }

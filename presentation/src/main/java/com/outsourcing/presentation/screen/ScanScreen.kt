@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,8 +59,12 @@ fun ScanScreen(
     // =============================================================================
 
 
-    LaunchedEffect(true) {
+    DisposableEffect(true) {
         cameraController.startCamera(lifecycleOwner)
+
+        onDispose {
+            cameraController.unbind()
+        }
     }
 
     LaunchedEffect(cameraState) {
@@ -114,7 +119,13 @@ fun ScanScreen(
 //                )
 //            }
 
-            if (cameraState == CameraUiState.Ready) {
+            if (cameraState == CameraUiState.NotReady) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxSize(0.7f),
+                )
+            } else {
                 AndroidView(
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -122,12 +133,6 @@ fun ScanScreen(
                     factory = {
                         cameraController.getPreviewView()
                     }
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .fillMaxSize(0.7f),
                 )
             }
 
