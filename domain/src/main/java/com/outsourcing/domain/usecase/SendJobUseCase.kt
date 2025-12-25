@@ -2,16 +2,15 @@ package com.outsourcing.domain.usecase
 
 import com.outsourcing.domain.entities.Job
 import com.outsourcing.domain.repository.JobRepository
-import com.outsourcing.domain.repository.LocalJobRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DeleteJobUseCase @Inject constructor(
-    private val localJobRepository: LocalJobRepository,
+class SendJobUseCase @Inject constructor(
+    private val jobRepository: JobRepository,
     private val ioDispatcher: CoroutineDispatcher
 ) {
     suspend operator fun invoke(job: Job) = withContext(ioDispatcher) {
-        localJobRepository.deleteJob(job)
+        jobRepository.sendJob(job)
     }
 }

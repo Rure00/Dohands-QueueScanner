@@ -25,16 +25,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.outsourcing.domain.entities.Job
 import com.outsourcing.presentation.components.JobRow
 import com.outsourcing.presentation.components.SummaryRow
-import com.outsourcing.presentation.state.JobEventUiModel
 import com.outsourcing.presentation.state.JobSummaryUiModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobListScreen(
 ) {
-    val jobs: List<JobEventUiModel> = listOf()
+    val jobs: List<Job> = listOf()
     val summary: JobSummaryUiModel = JobSummaryUiModel(0, 0, 0)
     val forceOffline: Boolean = false
 
@@ -45,7 +45,7 @@ fun JobListScreen(
     val onSyncNow: () -> Unit = {
 
     }
-    val onClickJob: (JobEventUiModel) -> Unit= {
+    val onClickJob: (Job) -> Unit= {
 
     }
 
