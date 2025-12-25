@@ -1,5 +1,7 @@
 package com.outsourcing.presentation.state
 
+import com.outsourcing.domain.entities.JobStatus
+
 data class JobEventUiModel(
     val id: String,
     val barcode: String,
