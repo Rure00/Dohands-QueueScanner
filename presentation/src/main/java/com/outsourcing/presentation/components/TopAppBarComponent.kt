@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,10 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.outsourcing.presentation.R
 import com.outsourcing.presentation.navigation.Destination
+import com.outsourcing.presentation.ui.theme.Black
 import com.outsourcing.presentation.ui.theme.Typography
 
 @Composable
-fun TopAppBarComponent(navController: NavController, screen: Destination) {
+fun TopAppBarComponent(
+    screen: Destination,
+    onBackButton: () -> Unit,
+    toJobListScreen: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth()
             .background(Color.LightGray)
@@ -32,7 +40,7 @@ fun TopAppBarComponent(navController: NavController, screen: Destination) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         if(screen != Destination.Scan) {
-            IconButton(onClick = { navController.navigateUp() }) {
+            IconButton(onClick = { onBackButton() }) {
                 Image(
                     painter = painterResource(R.drawable.back_arrow),
                     contentDescription = null,
@@ -51,5 +59,22 @@ fun TopAppBarComponent(navController: NavController, screen: Destination) {
             style = Typography.titleMedium,
             color = Color.Black
         )
+
+        when (screen) {
+            Destination.Scan -> {
+                Button(
+                    modifier = Modifier.wrapContentSize(),
+                    onClick = toJobListScreen
+                ) {
+                    Text(
+                        text = "Job List",
+                        color = Black
+                    )
+                }
+            }
+            else -> { }
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
     }
 }
