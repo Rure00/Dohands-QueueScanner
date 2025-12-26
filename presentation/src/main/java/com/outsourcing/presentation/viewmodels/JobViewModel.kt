@@ -1,6 +1,5 @@
 package com.outsourcing.presentation.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.outsourcing.domain.entities.Job
@@ -33,8 +32,8 @@ class JobViewModel @Inject constructor(
     private val _jobs = MutableStateFlow<List<Job>>(listOf())
     val jobs = _jobs.asStateFlow()
 
-    private val _isOffline = MutableStateFlow(false)
-    val isOffline = _isOffline.asStateFlow()
+    private val _isForcedOffline = MutableStateFlow(false)
+    val isForcedOffline = _isForcedOffline.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -45,7 +44,7 @@ class JobViewModel @Inject constructor(
     }
 
     fun setIsOffline(to: Boolean) {
-        _isOffline.value = to
+        _isForcedOffline.value = to
     }
 
     fun emitJobIntent(intent: JobIntent) {
@@ -60,7 +59,7 @@ class JobViewModel @Inject constructor(
             }
             is JobIntent.SendOrAddJob -> {
                 viewModelScope.launch {
-                    val result = if (_isOffline.value) {
+                    val result = if (_isForcedOffline.value) {
                         addJobUseCase.invoke(job = intent.job)
                     } else {
                         sendJobUseCase.invoke(job = intent.job)
@@ -74,7 +73,7 @@ class JobViewModel @Inject constructor(
                 }
             }
             is JobIntent.SendJob -> {
-                if (_isOffline.value) {
+                if (_isForcedOffline.value) {
                     _uiResult.value = UiResult.Fail("Offline 입니다.")
                     return
                 }
@@ -91,14 +90,14 @@ class JobViewModel @Inject constructor(
             }
             JobIntent.SendFailJobs -> {
                 viewModelScope.launch {
-                    if (_isOffline.value) return@launch
+                    if (_isForcedOffline.value) return@launch
 
                     sendFailJobsUseCase.invoke()
                 }
             }
             JobIntent.SendPendingJobs -> {
                 viewModelScope.launch {
-                    if (_isOffline.value) return@launch
+                    if (_isForcedOffline.value) return@launch
 
                     sendPendingJobsUseCase.invoke()
                 }
