@@ -26,8 +26,9 @@ import com.outsourcing.presentation.ui.theme.Typography
 fun TopAppBarComponent(navController: NavController, screen: Destination) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .height(65.dp)
-            .statusBarsPadding(),
+            .background(Color.LightGray)
+            .statusBarsPadding()
+            .height(65.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if(screen != Destination.Scan) {
