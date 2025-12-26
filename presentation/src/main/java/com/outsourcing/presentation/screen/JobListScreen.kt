@@ -39,12 +39,12 @@ import com.outsourcing.presentation.components.SummaryRow
 import com.outsourcing.presentation.state.JobSummaryUiModel
 import com.outsourcing.presentation.viewmodels.JobViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobListScreen(
     jobViewModel: JobViewModel = hiltViewModel()
 ) {
     val jobs by jobViewModel.jobs.collectAsState()
+
     val summary by remember {
         derivedStateOf {
             val arr = Array(3) { 0 }
@@ -64,8 +64,17 @@ fun JobListScreen(
 
     var selectedStatus by remember { mutableStateOf<JobStatus>(JobStatus.PENDING) }
 
+    val sortedJobs by remember {
+        derivedStateOf {
+            jobs.sortedWith(
+                compareBy { it.status == selectedStatus }
+            )
+        }
+    }
+
 
     val onSyncNow: () -> Unit = {
+
 
     }
     val onClickJob: (Job) -> Unit= {
@@ -114,7 +123,7 @@ fun JobListScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            items(jobs, key = { it.id }) { job ->
+            items(items = sortedJobs, key = { it.id }) { job ->
                 JobRow(
                     job = job,
                     onClick = { onClickJob(job) },
