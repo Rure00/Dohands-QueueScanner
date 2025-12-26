@@ -1,7 +1,10 @@
 package com.outsourcing.presentation.screen
 
+import android.Manifest
+import android.app.Activity
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -31,24 +34,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.outsourcing.presentation.components.ForceOfflineCard
+import com.outsourcing.presentation.viewmodels.JobViewModel
 import com.rure.barcode_scanner.CameraUiState
 import com.rure.barcode_scanner.createCameraController
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ScanScreen(
+    jobViewModel: JobViewModel = hiltViewModel(),
     toJobListScreen: () -> Unit,
 ) {
     val appContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val cameraController = remember { createCameraController(appContext) }
-
-
     val cameraState by cameraController.cameraState.collectAsState()
 
-    var forceOffline by remember { mutableStateOf(false) }
+    val isOffline by jobViewModel.isOffline.collectAsState()
+
     val onToggleForceOffline: (Boolean) -> Unit = {
 
     }
@@ -56,23 +64,23 @@ fun ScanScreen(
 
     }
 
+    val permissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA)) {
+        if(!it.containsValue(false)) {
+            cameraController.startCamera(lifecycleOwner)
+        } else {
+            Toast.makeText(appContext, "앱을 사용하기 위해선 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // =============================================================================
 
-
-    DisposableEffect(true) {
-        cameraController.startCamera(lifecycleOwner)
+    DisposableEffect(permissionState) {
+        permissionState.launchMultiplePermissionRequest()
 
         onDispose {
             cameraController.unbind()
         }
     }
-
-    LaunchedEffect(cameraState) {
-        Log.d("ScanScreen", "CameraState: ${cameraState}")
-    }
-
-
-
 
 
     // =============================================================================
@@ -84,7 +92,7 @@ fun ScanScreen(
             .fillMaxSize()
     ) {
         ForceOfflineCard(
-            forceOffline = forceOffline,
+            forceOffline = isOffline,
             onToggle = onToggleForceOffline,
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,13 +131,19 @@ fun ScanScreen(
                 Box(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .fillMaxSize(0.7f),
-                )
+                        .fillMaxSize(0.9f),
+                ) {
+                    Button(
+                        onClick = { permissionState.launchMultiplePermissionRequest() }
+                    ) {
+                        Text(text = "권한 허용하기")
+                    }
+                }
             } else {
                 AndroidView(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .fillMaxSize(0.7f),
+                        .fillMaxSize(0.9f),
                     factory = {
                         cameraController.getPreviewView()
                     }

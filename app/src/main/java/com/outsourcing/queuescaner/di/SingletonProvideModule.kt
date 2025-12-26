@@ -1,4 +1,4 @@
-package com.outsourcing.di
+package com.outsourcing.queuescaner.di
 
 import android.content.Context
 import androidx.room.Room

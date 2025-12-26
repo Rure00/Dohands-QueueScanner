@@ -1,4 +1,4 @@
-package com.outsourcing.di
+package com.outsourcing.queuescaner.di
 
 import com.outsourcing.data.repository.LocalJobRepositoryImpl
 import com.outsourcing.data.repository.RemoteJobRepositoryImpl
