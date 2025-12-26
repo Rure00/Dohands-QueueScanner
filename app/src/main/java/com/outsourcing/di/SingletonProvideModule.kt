@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 
 @Module
@@ -26,4 +27,8 @@ class SingletonProvideModule {
     @Provides
     @Singleton
     fun provideLocalJobDao(roomDataBase: MainRoomDataBase) = roomDataBase.localJobDao
+
+    @Provides
+    @Singleton
+    fun provideIoDispatcher() = Dispatchers.IO
 }
