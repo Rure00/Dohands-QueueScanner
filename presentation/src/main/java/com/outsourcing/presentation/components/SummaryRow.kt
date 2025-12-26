@@ -23,30 +23,41 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.outsourcing.domain.entities.JobStatus
 import com.outsourcing.presentation.state.JobSummaryUiModel
+import com.outsourcing.presentation.ui.theme.Black
+import com.outsourcing.presentation.ui.theme.White
 
 @Composable
 fun SummaryRow(
+    selected: JobStatus,
     summary: JobSummaryUiModel,
-    forceOffline: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedCard(modifier = modifier) {
-        Column(Modifier.padding(12.dp)) {
+    ElevatedCard(
+        modifier = modifier,
+        colors = CardDefaults.cardColors().copy(containerColor = Color.LightGray)
+    ) {
+        Column() {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SummaryChip("PENDING: ${summary.pending}")
-                Spacer(Modifier.width(8.dp))
-                SummaryChip("SENT: ${summary.sent}")
-                Spacer(Modifier.width(8.dp))
-                SummaryChip("FAILED: ${summary.failed}")
-                Spacer(Modifier.weight(1f))
-                val badgeText = if (forceOffline) "OFFLINE: ON" else "OFFLINE: OFF"
-                AssistChip(
-                    onClick = {},
-                    label = { Text(badgeText) },
-                    enabled = false
+                SummaryChip(
+                    isSelected = selected == JobStatus.PENDING,
+                    text = "PENDING: ${summary.pending}",
+                    modifier = Modifier.weight(1f)
+                )
+
+                SummaryChip(
+                    isSelected = selected == JobStatus.SENT,
+                    text = "SENT: ${summary.sent}",
+                    modifier = Modifier.weight(1f)
+
+                )
+                SummaryChip(
+                    isSelected = selected == JobStatus.FAILED,
+                    text = "FAILED: ${summary.failed}",
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -54,10 +65,22 @@ fun SummaryRow(
 }
 
 @Composable
-private fun SummaryChip(text: String) {
-    AssistChip(
-        onClick = {},
-        label = { Text(text) },
-        enabled = false
-    )
+private fun SummaryChip(
+    isSelected: Boolean,
+    text: String,
+    modifier: Modifier
+) {
+    val containerColor = if (isSelected) CardDefaults.cardColors().containerColor
+                        else Color.LightGray
+    Box(
+        modifier = modifier
+            .background(color = containerColor, AssistChipDefaults.shape)
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = White
+        )
+    }
 }

@@ -25,7 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -60,6 +62,8 @@ fun JobListScreen(
     }
     val forceOffline: Boolean = false
 
+    var selectedStatus by remember { mutableStateOf<JobStatus>(JobStatus.PENDING) }
+
 
     val onBack: () -> Unit = {
 
@@ -81,8 +85,8 @@ fun JobListScreen(
             .fillMaxSize()
     ) {
         SummaryRow(
+            selected = selectedStatus,
             summary = summary,
-            forceOffline = forceOffline,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
