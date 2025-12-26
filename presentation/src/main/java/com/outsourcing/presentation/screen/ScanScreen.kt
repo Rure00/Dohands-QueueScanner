@@ -2,6 +2,7 @@ package com.outsourcing.presentation.screen
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -34,11 +36,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.outsourcing.presentation.components.ForceOfflineCard
+import com.outsourcing.presentation.intent.JobIntent
+import com.outsourcing.presentation.state.UiResult
 import com.outsourcing.presentation.viewmodels.JobViewModel
 import com.rure.barcode_scanner.CameraUiState
 import com.rure.barcode_scanner.createCameraController
@@ -55,15 +60,21 @@ fun ScanScreen(
     val cameraController = remember { createCameraController(appContext) }
     val cameraState by cameraController.cameraState.collectAsState()
 
+    val uiResult by jobViewModel.uiResult.collectAsState()
     val isOffline by jobViewModel.isOffline.collectAsState()
 
     val onToggleForceOffline: (Boolean) -> Unit = {
-
+        jobViewModel.setIsOffline(it)
     }
     val onMockScan: () -> Unit = {
-
+        if (cameraState !is CameraUiState.Captured) {
+            Toast.makeText(appContext, "인식할 수 없습니다.", Toast.LENGTH_SHORT).show()
+        } else {
+            (cameraState as CameraUiState.Captured).rawBarcodes.forEach {
+                jobViewModel.emitJobIntent(JobIntent.InquireJob(rawBarcode = it))
+            }
+        }
     }
-
     val permissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA)) {
         if(!it.containsValue(false)) {
             cameraController.startCamera(lifecycleOwner)
@@ -74,6 +85,16 @@ fun ScanScreen(
 
     // =============================================================================
 
+    LaunchedEffect(uiResult) {
+        when (uiResult) {
+            is UiResult.Fail -> {
+                Log.i(JobViewModel.TAG, "Fail: ${(uiResult as UiResult.Fail).msg}")
+                Toast.makeText(appContext, "실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+            else -> {  }
+        }
+    }
+
     DisposableEffect(permissionState) {
         permissionState.launchMultiplePermissionRequest()
 
@@ -81,7 +102,6 @@ fun ScanScreen(
             cameraController.unbind()
         }
     }
-
 
     // =============================================================================
 
@@ -99,7 +119,6 @@ fun ScanScreen(
                 .padding(16.dp)
         )
 
-        // Camera preview placeholder (여기에 CameraX PreviewView/Analyzer를 붙이면 됨)
         Box(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -109,24 +128,6 @@ fun ScanScreen(
                 .background(Color(0xFFEDEDED)),
             contentAlignment = Alignment.Center
         ) {
-            // Scan frame overlay
-//            Spacer(
-//                modifier = Modifier
-//                    .aspectRatio(1f)
-//                    .fillMaxWidth()
-//                    .background(Color.Gray),
-//            )
-//
-//            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                Text("Scanning...", fontSize = 16.sp, color = Color(0xFF444444))
-//                Spacer(Modifier.height(8.dp))
-//                Text(
-//                    "Camera preview goes here",
-//                    fontSize = 12.sp,
-//                    color = Color(0xFF666666)
-//                )
-//            }
-
             if (cameraState == CameraUiState.NotReady) {
                 Box(
                     modifier = Modifier
@@ -149,7 +150,6 @@ fun ScanScreen(
                     }
                 )
             }
-
         }
 
         Spacer(Modifier.height(16.dp))
@@ -166,5 +166,17 @@ fun ScanScreen(
         }
 
         Spacer(Modifier.height(16.dp))
+    }
+
+    if (uiResult == UiResult.Loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(999f)
+                .background(Color.Black.copy(alpha = 0.35f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
