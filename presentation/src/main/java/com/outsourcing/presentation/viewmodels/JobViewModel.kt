@@ -13,12 +13,10 @@ import com.outsourcing.domain.usecase.SendPendingJobsUseCase
 import com.outsourcing.presentation.intent.JobIntent
 import com.outsourcing.presentation.state.UiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class JobViewModel @Inject constructor(
@@ -60,7 +58,7 @@ class JobViewModel @Inject constructor(
                     _uiResult.value = UiResult.Idle
                 }
             }
-            is JobIntent.SendJob -> {
+            is JobIntent.SendOrAddJob -> {
                 viewModelScope.launch {
                     val result = if (_isOffline.value) {
                         addJobUseCase.invoke(job = intent.job)
@@ -71,7 +69,22 @@ class JobViewModel @Inject constructor(
                     result.onSuccess {
                         _uiResult.value = UiResult.Success
                     }.onFailure {
-                        Log.i("JobViewModel", "SendJob Fail: ${it.message}")
+                        _uiResult.value = UiResult.Fail(it.message?: "알 수 없는 이유로 실패하였습니다.")
+                    }
+                }
+            }
+            is JobIntent.SendJob -> {
+                if (_isOffline.value) {
+                    _uiResult.value = UiResult.Fail("Offline 입니다.")
+                    return
+                }
+
+                viewModelScope.launch {
+                    val result = sendJobUseCase.invoke(job = intent.job)
+
+                    result.onSuccess {
+                        _uiResult.value = UiResult.Success
+                    }.onFailure {
                         _uiResult.value = UiResult.Fail(it.message?: "알 수 없는 이유로 실패하였습니다.")
                     }
                 }
