@@ -23,14 +23,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.outsourcing.presentation.components.TopAppBarComponent
+import com.outsourcing.presentation.ui.theme.White
 
 @Composable
 fun ScreenNavigator() {
     val navController = rememberNavController()
-    val pagerState = rememberPagerState(0, 0f) {
-        Destination::class.nestedClasses.size
-    }
-
     val backStackEntry by navController.currentBackStackEntryAsState()
     val screen = backStackEntry?.destination.toDestination() ?: Destination.Scan
 
@@ -44,16 +41,15 @@ fun ScreenNavigator() {
             )
         }
     ) { innerPadding ->
-        HorizontalPager(
-            modifier = Modifier.background(Color.White).padding(innerPadding),
-            state = pagerState,
-            userScrollEnabled = false
+        NavHost(
+            navController = navController,
+            startDestination = "main/",
+            modifier = Modifier
+                .background(White)
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            NavHost(
-                navController,
-                startDestination = "main/") {
-                mainNavGraph(navController)
-            }
+            mainNavGraph(navController)
         }
     }
 }
