@@ -60,14 +60,15 @@ internal class CameraControllerImpl(
                     COORDINATE_SYSTEM_VIEW_REFERENCED,
                     mainExecutor
                 ) { result: MlKitAnalyzer.Result? ->
-                    val barcodeResults = result?.getValue(barcodeScanner).orEmpty()   // result
-                    _cameraState.value = CameraUiState.Scanning
-
-                    Log.d("CameraController", "barcodeResults: $barcodeResults")
-
+                    val barcodeResults = result?.getValue(barcodeScanner).orEmpty()
                     if (barcodeResults.isEmpty()) return@MlKitAnalyzer
 
-                    _cameraState.value = CameraUiState.Captured(barcodeResults[0].toString())
+                    val rawResult = mutableListOf<String>()
+                    barcodeResults.forEach { barcode ->
+                        barcode.rawValue?.let { rawResult.add(it) }
+                    }
+
+                    _cameraState.value = CameraUiState.Captured(rawResult)
                 }
             )
         }

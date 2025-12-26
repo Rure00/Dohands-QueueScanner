@@ -1,4 +1,4 @@
-package com.outsourcing.di
+package com.outsourcing.queuescaner.di
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

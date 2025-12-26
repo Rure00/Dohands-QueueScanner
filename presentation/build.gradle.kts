@@ -70,6 +70,9 @@ dependencies {
     // Navigation
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    // compose permission
+    implementation ("com.google.accompanist:accompanist-permissions:0.36.0")
+
     // Reflect
     implementation(kotlin("reflect"))
 

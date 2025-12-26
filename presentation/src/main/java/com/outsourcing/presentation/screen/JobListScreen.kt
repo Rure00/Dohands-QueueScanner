@@ -1,5 +1,7 @@
 package com.outsourcing.presentation.screen
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -22,28 +24,64 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.outsourcing.domain.entities.Job
+import com.outsourcing.domain.entities.JobStatus
 import com.outsourcing.presentation.components.JobRow
 import com.outsourcing.presentation.components.SummaryRow
+import com.outsourcing.presentation.intent.JobIntent
 import com.outsourcing.presentation.state.JobSummaryUiModel
+import com.outsourcing.presentation.state.UiResult
+import com.outsourcing.presentation.viewmodels.JobViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobListScreen(
+    jobViewModel: JobViewModel = hiltViewModel()
 ) {
-    val jobs: List<Job> = listOf()
-    val summary: JobSummaryUiModel = JobSummaryUiModel(0, 0, 0)
-    val forceOffline: Boolean = false
+    val appContext = LocalContext.current.applicationContext
 
+    val jobs by jobViewModel.jobs.collectAsState()
+    val uiResult by jobViewModel.uiResult.collectAsState()
 
-    val onBack: () -> Unit = {
+    var selectedStatus by remember { mutableStateOf<JobStatus>(JobStatus.PENDING) }
+    val summary by remember {
+        derivedStateOf {
+            val arr = Array(3) { 0 }
 
+            jobs.forEach {
+                when (it.status) {
+                    JobStatus.PENDING -> arr[0] += 1
+                    JobStatus.SENT -> arr[1] += 1
+                    JobStatus.FAILED -> arr[2] += 1
+                }
+            }
+
+            JobSummaryUiModel(arr[0], arr[1], arr[2])
+        }
     }
-    val onSyncNow: () -> Unit = {
 
+    val sortedJobs by remember {
+        derivedStateOf {
+            jobs.sortedWith(
+                compareBy { it.status == selectedStatus }
+            )
+        }
+    }
+
+
+    val onSyncNow: () -> Unit = {
+        jobViewModel.emitJobIntent(JobIntent.SendPendingJobs)
     }
     val onClickJob: (Job) -> Unit= {
 
@@ -53,17 +91,34 @@ fun JobListScreen(
     // =============================================================================
 
 
+    LaunchedEffect(uiResult) {
+        when (uiResult) {
+            is UiResult.Fail -> {
+                Log.i(JobViewModel.TAG, "Fail: ${(uiResult as UiResult.Fail).msg}")
+                Toast.makeText(appContext, "실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+            else -> {  }
+        }
+    }
+
+
+
+    // =============================================================================
+
+
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         SummaryRow(
+            selected = selectedStatus,
             summary = summary,
-            forceOffline = forceOffline,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            onClick = { selectedStatus = it }
         )
 
         Button(
@@ -90,7 +145,7 @@ fun JobListScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            items(jobs, key = { it.id }) { job ->
+            items(items = sortedJobs, key = { it.id }) { job ->
                 JobRow(
                     job = job,
                     onClick = { onClickJob(job) },

@@ -7,7 +7,7 @@ import androidx.navigation.navigation
 import com.outsourcing.presentation.screen.ScanScreen
 import com.outsourcing.presentation.screen.JobListScreen
 
-fun NavGraphBuilder.mainNavGraph(navController: NavController, onScreenChanged: (Destination) -> Unit) {
+fun NavGraphBuilder.mainNavGraph(navController: NavController) {
     navigation(
         route = "main/",
         startDestination = Destination.Scan.route
