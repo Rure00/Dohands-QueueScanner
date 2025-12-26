@@ -1,8 +1,10 @@
 package com.outsourcing.presentation.components
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +36,7 @@ fun SummaryRow(
     selected: JobStatus,
     summary: JobSummaryUiModel,
     modifier: Modifier = Modifier,
+    onClick: (JobStatus) -> Unit,
 ) {
     ElevatedCard(
         modifier = modifier,
@@ -43,22 +47,31 @@ fun SummaryRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SummaryChip(
+                    status = JobStatus.PENDING,
+                    num = summary.pending,
                     isSelected = selected == JobStatus.PENDING,
-                    text = "PENDING: ${summary.pending}",
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    onClick(JobStatus.PENDING)
+                }
 
                 SummaryChip(
+                    status = JobStatus.SENT,
+                    num = summary.sent,
                     isSelected = selected == JobStatus.SENT,
-                    text = "SENT: ${summary.sent}",
                     modifier = Modifier.weight(1f)
+                ) {
+                    onClick(JobStatus.SENT)
+                }
 
-                )
                 SummaryChip(
+                    status = JobStatus.FAILED,
+                    num = summary.failed,
                     isSelected = selected == JobStatus.FAILED,
-                    text = "FAILED: ${summary.failed}",
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    onClick(JobStatus.FAILED)
+                }
             }
         }
     }
@@ -66,14 +79,22 @@ fun SummaryRow(
 
 @Composable
 private fun SummaryChip(
+    status: JobStatus,
+    num: Int,
     isSelected: Boolean,
-    text: String,
-    modifier: Modifier
+    modifier: Modifier,
+    onClick: (JobStatus) -> Unit
 ) {
+    val text = "${status.name}: $num"
     val containerColor = if (isSelected) CardDefaults.cardColors().containerColor
                         else Color.LightGray
     Box(
         modifier = modifier
+            .clickable(
+                indication = LocalIndication.current,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { onClick(status) },
+            )
             .background(color = containerColor, AssistChipDefaults.shape)
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center

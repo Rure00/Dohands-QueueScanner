@@ -60,14 +60,11 @@ fun JobListScreen(
             JobSummaryUiModel(arr[0], arr[1], arr[2])
         }
     }
-    val forceOffline: Boolean = false
+    val isOffline by jobViewModel.isOffline.collectAsState()
 
     var selectedStatus by remember { mutableStateOf<JobStatus>(JobStatus.PENDING) }
 
 
-    val onBack: () -> Unit = {
-
-    }
     val onSyncNow: () -> Unit = {
 
     }
@@ -89,7 +86,8 @@ fun JobListScreen(
             summary = summary,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            onClick = { selectedStatus = it }
         )
 
         Button(
