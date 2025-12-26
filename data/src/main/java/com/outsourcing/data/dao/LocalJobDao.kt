@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.outsourcing.data.entities.Job
 import kotlinx.coroutines.flow.Flow
 
@@ -30,4 +31,7 @@ interface LocalJobDao {
 
     @Delete
     fun deleteJob(job: Job)
+
+    @Update
+    fun updateJob(job: Job)
 }

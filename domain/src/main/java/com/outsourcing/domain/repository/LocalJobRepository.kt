@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface LocalJobRepository {
     fun collectLocalJobs(): Flow<List<Job>>
 
+    suspend fun updateJob(job: Job): Result<Job>
+
     suspend fun getSentJob(): Result<List<Job>>
     suspend fun getPendingJob(): Result<List<Job>>
     suspend fun getFailedJob(): Result<List<Job>>

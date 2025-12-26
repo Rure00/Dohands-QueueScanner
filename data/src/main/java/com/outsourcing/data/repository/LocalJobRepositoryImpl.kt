@@ -19,6 +19,13 @@ class LocalJobRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateJob(job: Job): Result<Job> {
+        return runCatching {
+            localJobDao.updateJob(fromDomainJob(job))
+            job
+        }
+    }
+
     override suspend fun getSentJob(): Result<List<Job>> {
         return kotlin.runCatching {
             localJobDao.getSentJob().map { it.toDomainJob() }

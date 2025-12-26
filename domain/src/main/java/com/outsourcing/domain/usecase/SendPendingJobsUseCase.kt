@@ -17,9 +17,7 @@ class SendPendingJobsUseCase @Inject constructor(
     suspend operator fun invoke() = withContext(ioDispatcher) {
         supervisorScope {
             localJobRepository.getPendingJob().getOrElse { listOf() }.map {
-                async {
-                    jobRepository.sendJob(it)
-                }
+                async { it to jobRepository.sendJob(it) }
             }.awaitAll()
         }
     }

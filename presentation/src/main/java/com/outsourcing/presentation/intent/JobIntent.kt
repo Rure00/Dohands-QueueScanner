@@ -7,5 +7,5 @@ sealed class JobIntent {
     data class SendOrAddJob(val job: Job): JobIntent()
     data class SendJob(val job: Job): JobIntent()
     data object SendPendingJobs: JobIntent()
-    data object SendFailJobs: JobIntent()
+    // data object SendFailJobs: JobIntent()
 }
