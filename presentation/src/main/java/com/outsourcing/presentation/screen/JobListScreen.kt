@@ -52,6 +52,7 @@ import com.outsourcing.presentation.viewmodels.JobViewModel
 
 @Composable
 fun JobListScreen(
+    toJobDetailScreen: (String) -> Unit,
     jobViewModel: JobViewModel = hiltViewModel()
 ) {
     val appContext = LocalContext.current.applicationContext
@@ -89,7 +90,7 @@ fun JobListScreen(
         jobViewModel.emitJobIntent(JobIntent.SendPendingJobs)
     }
     val onClickJob: (Job) -> Unit= {
-
+        toJobDetailScreen(it.id)
     }
 
 

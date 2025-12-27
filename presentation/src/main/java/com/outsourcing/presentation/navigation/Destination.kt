@@ -11,4 +11,8 @@ sealed class Destination(
     data object JobList : Destination(
         "Job List", "job_list",
     )
+
+    data object JobDetail: Destination(
+        "Job Detail", "job_detail"
+    )
 }
