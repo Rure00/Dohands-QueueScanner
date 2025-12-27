@@ -14,6 +14,9 @@ interface LocalJobDao {
     @Query("SELECT * FROM job")
     fun collectLocalJobs(): Flow<List<Job>>
 
+    @Query("SELECT * FROM job WHERE id = :id")
+    fun observeJobById(id: String): Flow<List<Job>>
+
     @Query("SELECT * FROM job WHERE status = 'SENT'")
     suspend fun getSentJob(): List<Job>
 
@@ -23,8 +26,7 @@ interface LocalJobDao {
     @Query("SELECT * FROM job WHERE status = 'FAILED'")
     suspend fun getFailedJob(): List<Job>
 
-    @Query("SELECT * FROM job WHERE id = :id")
-    suspend fun getJobById(id: String): Job?
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertJob(job: Job)

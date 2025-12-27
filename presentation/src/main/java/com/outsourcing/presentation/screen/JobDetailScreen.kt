@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,14 +23,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.outsourcing.domain.entities.Job
 import com.outsourcing.presentation.components.DetailRow
 import com.outsourcing.presentation.components.ErrorChip
+import com.outsourcing.presentation.viewmodels.JobDetailViewModel
 import com.outsourcing.presentation.viewmodels.JobViewModel
 
 @Composable
 fun JobDetailScreen(
     jobId: String,
+    jobDetailViewModel: JobDetailViewModel = hiltViewModel()
 ) {
-    val onCopyEventId: (String) -> Unit = {
+    val context = LocalContext.current
 
+    val job by jobDetailViewModel.jobFlow.collectAsState()
+    val onCopyEventId: (String?) -> Unit = {
+        if (!it.isNullOrEmpty()) {
+            val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            cm.setPrimaryClip(ClipData.newPlainText("JobId", it))
+        }
     }
 
     // ============================================================================================
@@ -48,9 +58,9 @@ fun JobDetailScreen(
         HorizontalDivider()
         Spacer(Modifier.height(12.dp))
 
-        DetailRow(label = "EVENT ID:", value = job.id)
+        DetailRow(label = "EVENT ID:", value = job?.id ?: "")
         Spacer(Modifier.height(10.dp))
-        DetailRow(label = "RETRY COUNT:", value = job.retryCount.toString())
+        DetailRow(label = "RETRY COUNT:", value = job?.retryCount.toString() )
 
         Spacer(Modifier.height(16.dp))
         HorizontalDivider()
@@ -63,7 +73,7 @@ fun JobDetailScreen(
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = job.barcode,
+            text = job?.barcode ?: "",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Medium,
             maxLines = 2,
@@ -72,7 +82,7 @@ fun JobDetailScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        job.errorText?.let {
+        job?.errorText?.let {
             ErrorChip(text = it)
             Spacer(Modifier.height(16.dp))
         }
@@ -80,7 +90,7 @@ fun JobDetailScreen(
         Spacer(Modifier.weight(1f))
 
         Button(
-            onClick = { onCopyEventId(job.id) },
+            onClick = { onCopyEventId(job?.id) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
