@@ -13,9 +13,22 @@ import javax.inject.Inject
 class LocalJobRepositoryImpl @Inject constructor(
     private val localJobDao: LocalJobDao
 ): LocalJobRepository {
+    override fun observeJobById(id: String): Flow<Job?> {
+        return localJobDao.observeJobById(id).map {
+            it.firstOrNull()?.toDomainJob()
+        }
+    }
+
     override fun collectLocalJobs(): Flow<List<Job>> {
         return localJobDao.collectLocalJobs().map {
             it.map { job -> job.toDomainJob() }
+        }
+    }
+
+    override suspend fun updateJob(job: Job): Result<Job> {
+        return runCatching {
+            localJobDao.updateJob(fromDomainJob(job))
+            job
         }
     }
 
