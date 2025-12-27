@@ -79,7 +79,7 @@ fun JobListScreen(
     val sortedJobs by remember {
         derivedStateOf {
             jobs.sortedWith(
-                compareBy { it.status == selectedStatus }
+                compareBy { it.status != selectedStatus }
             )
         }
     }
