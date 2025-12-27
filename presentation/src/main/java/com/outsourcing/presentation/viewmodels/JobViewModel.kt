@@ -29,7 +29,6 @@ class JobViewModel @Inject constructor(
     private val sendJobUseCase: SendJobUseCase,
     private val addJobUseCase: AddJobUseCase,
     private val sendPendingJobsUseCase: SendPendingJobsUseCase,
-    private val updateJobUseCase: UpdateJobUseCase
 ): ViewModel() {
     private val _uiResult = MutableStateFlow<UiResult>(UiResult.Idle)
     val uiResult = _uiResult.asStateFlow()
@@ -42,7 +41,7 @@ class JobViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getAllJobsUseCase.invoke().collect {
+            getAllJobsUseCase().collect {
                 _jobs.value = it
             }
         }
@@ -57,22 +56,30 @@ class JobViewModel @Inject constructor(
             is JobIntent.InquireJob -> {
                 _uiResult.value = UiResult.Loading
                 viewModelScope.launch {
-                    val newJob = generateMockJobUseCase.invoke(intent.rawBarcode)
-                    addJobUseCase.invoke(newJob)
+                    val newJob = generateMockJobUseCase(intent.rawBarcode)
+                    addJobUseCase(newJob)
+
+                    if (!_isForcedOffline.value) {
+                        val (_, result) = sendJobUseCase(job = newJob, tryUntil = RETRY_MAX)
+                        handleSendJob(result)
+                    }
+
                     _uiResult.value = UiResult.Idle
                 }
             }
             is JobIntent.SendOrAddJob -> {
                 viewModelScope.launch {
                     if (_isForcedOffline.value) {
-                        addJobUseCase.invoke(job = intent.job)
-                            .onSuccess {
-                                _uiResult.value = UiResult.Success
-                            }.onFailure {
-                                _uiResult.value = UiResult.Fail(it.message?: "알 수 없는 이유로 실패하였습니다.")
-                            }
+                        addJobUseCase(
+                            job = intent.job
+                        ).onSuccess {
+                            _uiResult.value = UiResult.Idle
+                        }.onFailure {
+                            _uiResult.value = UiResult.Fail(it.message?: "알 수 없는 이유로 실패하였습니다.")
+                        }
                     } else {
-                        handleSendJob(intent.job, sendJobUseCase.invoke(job = intent.job))
+                        val (_, result) = sendJobUseCase(job = intent.job, tryUntil = RETRY_MAX)
+                        handleSendJob(result)
                     }
                 }
             }
@@ -82,7 +89,8 @@ class JobViewModel @Inject constructor(
                     return
                 }
                 viewModelScope.launch {
-                    handleSendJob(intent.job, sendJobUseCase.invoke(job = intent.job))
+                    val (_, result) = sendJobUseCase(job = intent.job, tryUntil = RETRY_MAX)
+                    handleSendJob(result)
                 }
             }
             JobIntent.SendPendingJobs -> {
@@ -90,8 +98,8 @@ class JobViewModel @Inject constructor(
                 viewModelScope.launch {
                     Log.d(TAG, "SendPendingJobs: ${_isForcedOffline.value}")
                     if (_isForcedOffline.value) return@launch
-                    sendPendingJobsUseCase.invoke().forEach { (job, r) ->
-                        handleSendJob(job , r)
+                    sendPendingJobsUseCase(RETRY_MAX).forEach { (_, result) ->
+                        handleSendJob(result)
                     }
                     _uiResult.value = UiResult.Idle
                 }
@@ -99,37 +107,21 @@ class JobViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleSendJob(job: Job, remoteResult: RemoteResult<Job>) {
-        var isSuccess = false
+    private fun handleSendJob(remoteResult: RemoteResult<Job>) {
         when (remoteResult) {
             is RemoteResult.Success -> {
-                isSuccess = true
                 _uiResult.value = UiResult.Idle
             }
             is RemoteResult.HttpError -> {
-                val tryFor = maxOf(1, RETRY_MAX - 1 - job.retryCount)
-                repeat(tryFor) {
-                    delay(1000)
-                    sendJobUseCase.invoke(job)
-                }
-                addJobUseCase.invoke(
-                    job.copy(retryCount = job.retryCount + tryFor + 1)
-                )
+                _uiResult.value = UiResult.Fail(remoteResult.body ?: "알 수 없는 이유로 실패하였습니다.")
             }
-            else -> {
-                addJobUseCase.invoke(
-                    job.copy(retryCount = job.retryCount + 1)
-                )
+            is RemoteResult.Offline -> {
+                _uiResult.value = UiResult.Fail("네트워크를 확인해주세요.")
+            }
+            is RemoteResult.Unknown -> {
+                _uiResult.value = UiResult.Fail(remoteResult.t.message ?: "알 수 없는 이유로 실패하였습니다.")
             }
         }
-
-        Log.d(TAG, "handleSendJob: $isSuccess")
-
-        updateJobUseCase.invoke(
-            job.copy(status = if (isSuccess) JobStatus.SENT else JobStatus.FAILED)
-        )
-
-        Log.d(TAG, "update Job finished")
     }
 
     companion object {

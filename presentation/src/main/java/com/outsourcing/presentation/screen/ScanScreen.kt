@@ -65,6 +65,7 @@ fun ScanScreen(
             (cameraState as CameraUiState.Captured).rawBarcodes.forEach {
                 jobViewModel.emitJobIntent(JobIntent.InquireJob(rawBarcode = it))
             }
+            Toast.makeText(appContext, "인식 성공", Toast.LENGTH_SHORT).show()
         }
     }
     val permissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA)) {
