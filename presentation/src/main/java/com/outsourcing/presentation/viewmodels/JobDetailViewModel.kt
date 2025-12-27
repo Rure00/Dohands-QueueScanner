@@ -8,8 +8,10 @@ import com.outsourcing.domain.usecase.SendJobUseCase
 import com.outsourcing.presentation.state.UiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +25,11 @@ class JobDetailViewModel @Inject constructor(
 
     private val _jobFlow = MutableStateFlow<Job?>(null)
     val jobFlow = _jobFlow.asStateFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = WhileSubscribed(5000),
+            initialValue = null
+        )
 
 
     fun observeJobById(id: String) {

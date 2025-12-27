@@ -1,5 +1,6 @@
 package com.outsourcing.presentation.navigation
 
+import android.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -24,7 +25,7 @@ fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         composable(route = Destination.JobList.route) {
             JobListScreen(
                 toJobDetailScreen = {
-                    navController.navigate(Destination.JobDetail.route + "/${id}")
+                    navController.navigate(Destination.JobDetail.route + "/${it}")
                 }
             )
         }

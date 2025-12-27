@@ -62,7 +62,7 @@ private fun NavDestination?.toDestination(): Destination? {
     return when {
         routes.any { it.startsWith(Destination.Scan.route) } -> Destination.Scan
         routes.any { it.startsWith(Destination.JobList.route) } -> Destination.JobList
-        // 필요 화면 계속 추가
+        routes.any { it.startsWith(Destination.JobDetail.route) } -> Destination.JobDetail
         else -> null
     }
 }

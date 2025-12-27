@@ -3,6 +3,7 @@ package com.outsourcing.presentation.screen
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,9 +22,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.outsourcing.domain.entities.Job
 import com.outsourcing.presentation.components.DetailRow
 import com.outsourcing.presentation.components.ErrorChip
+import com.outsourcing.presentation.ui.theme.Black
 import com.outsourcing.presentation.viewmodels.JobDetailViewModel
 import com.outsourcing.presentation.viewmodels.JobViewModel
 
@@ -33,13 +37,22 @@ fun JobDetailScreen(
 ) {
     val context = LocalContext.current
 
-    val job by jobDetailViewModel.jobFlow.collectAsState()
+    val job by jobDetailViewModel.jobFlow.collectAsStateWithLifecycle()
     val onCopyEventId: (String?) -> Unit = {
         if (!it.isNullOrEmpty()) {
             val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             cm.setPrimaryClip(ClipData.newPlainText("JobId", it))
         }
     }
+
+    // ============================================================================================
+
+
+    LaunchedEffect(jobId) {
+        jobDetailViewModel.observeJobById(jobId)
+    }
+
+
 
     // ============================================================================================
 
@@ -51,7 +64,8 @@ fun JobDetailScreen(
         Text(
             text = "Event Detail",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = Black
         )
 
         Spacer(Modifier.height(12.dp))
@@ -69,7 +83,8 @@ fun JobDetailScreen(
         Text(
             text = "BarCode",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = Black
         )
         Spacer(Modifier.height(8.dp))
         Text(
@@ -77,7 +92,8 @@ fun JobDetailScreen(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Medium,
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            color = Black
         )
 
         Spacer(Modifier.height(16.dp))
