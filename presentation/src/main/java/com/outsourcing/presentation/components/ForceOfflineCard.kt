@@ -31,10 +31,10 @@ fun ForceOfflineCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Force Offline (Demo)", fontWeight = FontWeight.SemiBold)
+                Text("Force Offline", fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "ON이면 전송을 실패로 처리(시연용)",
+                    "로컬에 저장",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF666666)
                 )

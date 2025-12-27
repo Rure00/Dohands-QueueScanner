@@ -34,19 +34,9 @@ class JobDetailViewModel @Inject constructor(
 
     fun observeJobById(id: String) {
         viewModelScope.launch {
-            observeJobByIdUseCase.invoke(id).collectLatest {
+            observeJobByIdUseCase(id).collectLatest {
                 _jobFlow.value = it
             }
-        }
-    }
-
-    fun sendJob() {
-        _uiResult.value = UiResult.Loading
-        viewModelScope.launch {
-            jobFlow.value?.let {
-                sendJobUseCase.invoke(it)
-            }
-            _uiResult.value = UiResult.Idle
         }
     }
 }

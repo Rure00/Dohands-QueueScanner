@@ -10,14 +10,15 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SendPendingJobsUseCase @Inject constructor(
+    private val sendJobUseCase: SendJobUseCase,
     private val jobRepository: JobRepository,
     private val localJobRepository: LocalJobRepository,
     private val ioDispatcher: CoroutineDispatcher
 ) {
-    suspend operator fun invoke() = withContext(ioDispatcher) {
+    suspend operator fun invoke(tryUntil: Int) = withContext(ioDispatcher) {
         supervisorScope {
             localJobRepository.getPendingJob().getOrElse { listOf() }.map {
-                async { it to jobRepository.sendJob(it) }
+                async { sendJobUseCase(it, tryUntil) }
             }.awaitAll()
         }
     }
